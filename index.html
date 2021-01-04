@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="style.css">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <script src="engine.js"></script>
+    <title>Document</title>
+</head>
+<body>
+    <div class="root">
+        <h1 id="title">todos</h1>
+        <div>
+            <div id="input_bar">
+                <button id="btnToggleAll"><i class='fas fa-chevron-down' style='font-size:24px'></i></button>
+                <input type="text" id="inputTitle" placeholder="What needs to be done?"/>
+            </div>
+            <div id="todos"></div>
+            <div>
+                <div class="bottom_menu_top">
+                    <div id="text_counting">
+                        <div id="count">0</div>
+                        <div style="margin-left: 2px; margin-right: 2px;">left items</div>
+                    </div>
+                    <div>
+                        <button class="current_btn" id="btnAll">All</button>
+                        <button id="btnActive">Active</button>
+                        <button id="btnCompleted">Completed</button>
+                    </div>
+                </div>
+                <button id="btnClearCompleted" class="no_visible" style="width: 100%;">Clear completed</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
