@@ -19,21 +19,20 @@ window.onload = () => {
     const btnCompleted = document.getElementById("btnCompleted");
     const textCount = document.getElementById("count");
     const btnClearCompleted = document.getElementById("btnClearCompleted");
+    const btnToggleAll = document.getElementById("btnToggleAll");
 
     const todoList = [];
-
-    let countLeft = 0;
 
     let viewedTodoList = todoList;
 
     let currentTab = "All";
 
     const handlerInput = (e) => {
-        if(!inputTitle.value.trim()) return; 
-        if(e.keyCode == 13) {
+        if(!inputTitle.value.trim()) return;
+        if(e.keyCode === 13) {
             todoList.push(new Todo(inputTitle.value.trim()));
             inputTitle.value = "";
-            views(true);
+            views();
         }
     }
 
@@ -50,23 +49,15 @@ window.onload = () => {
         checkbox.type = "checkbox";
         checkbox.checked = todo.isCompleted;
 
-        checkbox.addEventListener('change', (checked) => {
+        checkbox.addEventListener('change', () => {
             todo.toggleStatus();
             views();
-            if(todo.isCompleted){
-                countLeft -= 1;
-            }
-            else {
-                countLeft += 1;
-            }
-
-            viewCount();
         });
-        
+
         const titleContainer = document.createElement("div");
-        
+
         const title = document.createElement("h5");
-        
+
         title.appendChild(document.createTextNode(todo.title));
 
         titleContainer.appendChild(title);
@@ -74,21 +65,16 @@ window.onload = () => {
 
         container.appendChild(checkboxContainer);
         container.appendChild(titleContainer);
-    
 
         todosContainer.appendChild(container);
     }
-    
-    function views (isNewTodo = false) {
+
+    function views () {
         todosContainer.innerHTML = "";
-        if(isNewTodo) {
-            countLeft += 1;
-            viewCount();
-        }
 
         switch (currentTab) {
             case "All":
-                viewedTodoList = todoList; 
+                viewedTodoList = todoList;
                 break;
             case "Active":
                 viewedTodoList = todoList.filter(todo => !todo.isCompleted);
@@ -99,20 +85,43 @@ window.onload = () => {
         }
 
         viewedTodoList.forEach(todo => viewTodo(todo));
-        
-        if((todoList.length - countLeft !== 0) !== btnClearCompleted.classList.contains("no_visible")) {
-            btnClearCompleted.classList.toggle("no_visible");
-        }
+        viewCount();
     }
 
     function viewCount (){
         textCount.innerHTML = "";
-        textCount.appendChild(document.createTextNode(countLeft));
+
+        const countTodosActive = todoList.filter(todo => !todo.isCompleted).length;
+        const countTodos = todoList.length;
+        const isVisibleBtnClearCompleted = btnClearCompleted.classList.contains("no_visible");
+
+        if((countTodos - countTodosActive > 0) && isVisibleBtnClearCompleted) {
+            btnClearCompleted.classList.toggle("no_visible");
+        }
+        else if((countTodos - countTodosActive === 0) && !isVisibleBtnClearCompleted) {
+            btnClearCompleted.classList.toggle("no_visible");
+        }
+
+        const text = document.createTextNode(countTodosActive.toString());
+        textCount.appendChild(text);
+    }
+
+    function toggleAll() {
+        const todosActive = todoList.filter(todo => !todo.isCompleted);
+
+        if(todosActive.length !== 0) {
+            todosActive.forEach(todo => todo.toggleStatus());
+        }
+        else {
+            todoList.forEach(todo => todo.toggleStatus());
+        }
+
+        views();
     }
 
     function toggleTab (curBtn, tab) {
-        const allBtn = [btnAll, btnActive, btnCompleted].filter(btn => btn.id != curBtn.id);
-        
+        const allBtn = [btnAll, btnActive, btnCompleted].filter(btn => btn.id !== curBtn.id);
+
         return () => {
             allBtn.forEach(btn => btn.classList.contains("current_btn") && btn.classList.toggle("current_btn"));
             curBtn.classList.toggle("current_btn");
@@ -120,6 +129,8 @@ window.onload = () => {
             views();
         }
     }
+
+    btnToggleAll.onclick = toggleAll;
 
     btnAll.onclick = toggleTab(btnAll, "All");
     btnActive.onclick = toggleTab(btnActive, "Active");
