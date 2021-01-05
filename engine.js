@@ -1,44 +1,25 @@
+const TABS = {
+    All: "All",
+    Active: "Active",
+    Completed: "Completed"
+}
+
 class Todo {
     constructor(title) {
+        this.id = new Date();
         this.title = title;
         this.isCompleted = false;
-        this.created = new Date();
+    }
+
+    edit(title) {
+        this.title = title;
     }
 
     toggleStatus() {
         this.isCompleted = !this.isCompleted;
     }
-}
 
-window.onload = () => {
-    const todosContainer = document.getElementById("todos");
-    const inputTitle = document.getElementById("inputTitle");
-
-    const btnAll = document.getElementById("btnAll");
-    const btnActive = document.getElementById("btnActive");
-    const btnCompleted = document.getElementById("btnCompleted");
-    const textCount = document.getElementById("count");
-    const btnClearCompleted = document.getElementById("btnClearCompleted");
-    const btnToggleAll = document.getElementById("btnToggleAll");
-
-    let todoList = [];
-
-    let viewedTodoList = todoList;
-
-    let currentTab = "All";
-
-    const handlerInput = (e) => {
-        if(!inputTitle.value.trim()) return;
-        if(e.keyCode === 13) {
-            todoList.push(new Todo(inputTitle.value.trim()));
-            inputTitle.value = "";
-            views();
-        }
-    }
-
-    inputTitle.addEventListener("keypress", handlerInput);
-
-    function viewTodo (todo) {
+    render(listRenderElement, handleRemove, listRender) {
         const container = document.createElement("div");
         container.className = "todo";
 
@@ -47,29 +28,38 @@ window.onload = () => {
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
-        checkbox.checked = todo.isCompleted;
+        checkbox.checked = this.isCompleted;
 
         checkbox.addEventListener('change', () => {
-            todo.toggleStatus();
-            views();
+            this.toggleStatus();
+            listRender();
         });
 
         const titleContainer = document.createElement("div");
 
-        const title = document.createElement("h5");
+        const title = document.createElement("p");
 
         const btnDeleteContainer = document.createElement("div");
+        btnDeleteContainer.style.visibility = "hidden";
 
         const btnDelete = document.createElement("button");
-        const btnP = document.createElement("p");
+        
+        btnDelete.className = "btn_delete";
 
-        btnP.appendChild(document.createTextNode("&#10006;"));
-        btnDelete.appendChild(btnP);
+        btnDelete.onclick = () => {
+            handleRemove();
+            listRender();
+        }
+
+        const btnIcon = document.createElement("i");
+        btnIcon.className = "fa fa-times";
+
+        btnDelete.appendChild(btnIcon);
 
         const firstContainer = document.createElement("div");
         const secondContainer = document.createElement("div");
 
-        title.appendChild(document.createTextNode(todo.title));
+        title.appendChild(document.createTextNode(this.title));
 
         titleContainer.appendChild(title);
         checkboxContainer.appendChild(checkbox);
@@ -84,79 +74,143 @@ window.onload = () => {
         container.appendChild(firstContainer);
         container.appendChild(secondContainer);
 
-        todosContainer.appendChild(container);
-    }
-
-    function views () {
-        todosContainer.innerHTML = "";
-
-        switch (currentTab) {
-            case "All":
-                viewedTodoList = todoList;
-                break;
-            case "Active":
-                viewedTodoList = todoList.filter(todo => !todo.isCompleted);
-                break;
-            case "Completed":
-                viewedTodoList = todoList.filter(todo => todo.isCompleted);
-                break;
+        container.onmouseover = () => {
+            btnDeleteContainer.style.visibility = "visible";
         }
 
-        viewedTodoList.forEach(todo => viewTodo(todo));
-        viewCount();
-    }
-
-    function viewCount (){
-        textCount.innerHTML = "";
-
-        const countTodosActive = todoList.filter(todo => !todo.isCompleted).length;
-        const countTodos = todoList.length;
-        const isVisibleBtnClearCompleted = btnClearCompleted.classList.contains("no_visible");
-
-        if((countTodos - countTodosActive > 0) && isVisibleBtnClearCompleted) {
-            btnClearCompleted.classList.toggle("no_visible");
-        }
-        else if((countTodos - countTodosActive === 0) && !isVisibleBtnClearCompleted) {
-            btnClearCompleted.classList.toggle("no_visible");
+        container.onmouseout = () => {
+            btnDeleteContainer.style.visibility = "hidden";
         }
 
-        const text = document.createTextNode(countTodosActive.toString());
-        textCount.appendChild(text);
+        listRenderElement.appendChild(container);
+    }
+}
+
+class TodoList {
+    constructor(domNode) {
+        this.list = [];
+        this.viewList = this.list;
+        this.domNode = domNode
     }
 
-    function toggleAll() {
-        const todosActive = todoList.filter(todo => !todo.isCompleted);
+    add(title) {
+        this.list.push(new Todo(title));
+    }
+
+    remove(id) {
+        console.log(this);
+        this.list = this.list.filter((todo) => id !== todo.id);
+    }
+
+    toggleAll() {
+        const todosActive = this.list.filter(todo => !todo.isCompleted);
 
         if(todosActive.length !== 0) {
             todosActive.forEach(todo => todo.toggleStatus());
         }
         else {
-            todoList.forEach(todo => todo.toggleStatus());
+            this.list.forEach(todo => todo.toggleStatus());
         }
-
-        views();
     }
 
-    function toggleTab (curBtn, tab) {
+    clearCompleted() {
+        this.list = this.list.filter(todo => !todo.isCompleted);
+    }
+
+    switchRenderList(tab) {
+        switch (tab) {
+            case TABS.All:
+                this.viewList = this.list;
+                break;
+            case TABS.Active:
+                this.viewList = this.list.filter(todo => !todo.isCompleted);
+                break;
+            case TABS.Completed:
+                this.viewList = this.list.filter(todo => todo.isCompleted);
+                break;
+        }
+    }
+
+    render(listRenderElement, counterRenderElement) {
+        listRenderElement.innerHTML = "";
+        counterRenderElement.innerHTML = "";
+
+        const countTodosActive = this.list.filter(todo => !todo.isCompleted).length;
+
+        const text = document.createTextNode(countTodosActive.toString());
+
+        function configuredRender() { this.render(listRenderElement, counterRenderElement) };
+
+        this.viewList.forEach(todo => todo.render(listRenderElement, counterRenderElement, () => this.remove(todo.id), configuredRender));
+
+        counterRenderElement.appendChild(text);
+    }
+}
+
+window.onload = () => {
+    const todosContainer = document.getElementById("todos");
+    const inputTitle = document.getElementById("inputTitle");
+    const btnAll = document.getElementById("btnAll");
+    const btnActive = document.getElementById("btnActive");
+    const btnCompleted = document.getElementById("btnCompleted");
+    const textCount = document.getElementById("count");
+    const btnClearCompleted = document.getElementById("btnClearCompleted");
+    const btnToggleAll = document.getElementById("btnToggleAll");
+
+    let todoList = new TodoList(todosContainer);
+
+    let currentTab = TABS.All;
+
+    let render = () => {
+        todoList.switchRenderList(currentTab);
+        todoList.render(todosContainer, textCount);
+    }
+
+    const handlerInput = (e) => {
+        if(!inputTitle.value.trim()) return;
+        if(e.keyCode === 13) {
+            todoList.add(inputTitle.value.trim());
+            inputTitle.value = "";
+            render();
+        }
+    }
+
+    inputTitle.addEventListener("keypress", handlerInput);
+
+    const toggleAll = () => {
+        todoList.toggleAll();
+        render();
+    }
+
+    const clearCompleted = () => {
+        todoList.clearCompleted();
+        render();
+    }
+
+    const toggleTab = (curBtn, tab) => {
         const allBtn = [btnAll, btnActive, btnCompleted].filter(btn => btn.id !== curBtn.id);
 
         return () => {
             allBtn.forEach(btn => btn.classList.contains("current_btn") && btn.classList.toggle("current_btn"));
             curBtn.classList.toggle("current_btn");
             currentTab = tab;
-            views();
+            render();
         }
-    }
-
-    function clearCompleted() {
-        todoList = todoList.filter(todo => !todo.isCompleted);
-        views();
     }
 
     btnToggleAll.onclick = toggleAll;
     btnClearCompleted.onclick = clearCompleted;
 
-    btnAll.onclick = toggleTab(btnAll, "All");
-    btnActive.onclick = toggleTab(btnActive, "Active");
-    btnCompleted.onclick = toggleTab(btnCompleted, "Completed");
+    btnAll.onclick = toggleTab(btnAll, TABS.All);
+    btnActive.onclick = toggleTab(btnActive, TABS.Active);
+    btnCompleted.onclick = toggleTab(btnCompleted, TABS.Completed);
 }
+        // const countTodos = this.list.length;
+        // const isVisibleBtnClearCompleted = btnClearCompleted.classList.contains("no_visible");
+
+        // if((countTodos - countTodosActive > 0) && isVisibleBtnClearCompleted) {
+        //     btnClearCompleted.classList.toggle("no_visible");
+        // }
+        // else if((countTodos - countTodosActive === 0) && !isVisibleBtnClearCompleted) {
+        //     btnClearCompleted.classList.toggle("no_visible");
+        // }

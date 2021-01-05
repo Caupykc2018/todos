@@ -16,20 +16,22 @@
                 <button id="btnToggleAll"><i class='fas fa-chevron-down' style='font-size:24px'></i></button>
                 <input type="text" id="inputTitle" placeholder="What needs to be done?"/>
             </div>
-            <div id="todos"></div>
-            <div>
-                <div class="bottom_menu_top">
-                    <div id="text_counting">
-                        <div id="count">0</div>
-                        <div style="margin-left: 2px; margin-right: 2px;">left items</div>
+            <div class="main">
+                <div id="todos"></div>
+                <div>
+                    <div class="bottom_menu_top">
+                        <div id="text_counting">
+                            <div id="count">0</div>
+                            <div style="margin-left: 2px; margin-right: 2px;">left items</div>
+                        </div>
+                        <div>
+                            <button class="btn" id="btnAll">All</button>
+                            <button class="btn" id="btnActive">Active</button>
+                            <button class="btn" id="btnCompleted">Completed</button>
+                        </div>
                     </div>
-                    <div>
-                        <button class="btn" id="btnAll">All</button>
-                        <button class="btn" id="btnActive">Active</button>
-                        <button class="btn" id="btnCompleted">Completed</button>
-                    </div>
+                    <button id="btnClearCompleted" class="no_visible btn" style="width: 100%;">Clear completed</button>
                 </div>
-                <button id="btnClearCompleted" class="no_visible btn" style="width: 100%;">Clear completed</button>
             </div>
         </div>
     </div>

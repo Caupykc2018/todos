@@ -21,16 +21,26 @@ body {
     color: rgba(175, 47, 47, 0.15);
 }
 
+.main {
+    background-color: white;
+}
+
 .todo {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     padding: 3px;
+    border: 1px solid lightgrey;
 }
 
 .todo div {
     display: flex;
     flex-direction: row;
+}
+
+.todo div div {
+    display: flex;
+    align-items: center;
 }
 
 .todo_checkbox {
@@ -50,6 +60,12 @@ body {
 
 #input_bar {
     display: flex;
+    background-color: white;
+}
+
+#input_bar * {
+    margin: 2px;
+    outline: none;
 }
 
 .btn {
@@ -64,11 +80,21 @@ body {
 }
 
 .btn_delete {
-    margin-left: 100%;
+    background-color: transparent;
+    border: 0;
 }
 
 .no_visible {
-    visibility: hidden;
+    display: none;
 }
 
+#btnToggleAll {
+    background-color: white;
+    border: 0;
+}
 
+#inputTitle {
+    width: 100%;
+    border: 0;
+    font-size: 24px;
+}
