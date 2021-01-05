@@ -21,7 +21,7 @@ window.onload = () => {
     const btnClearCompleted = document.getElementById("btnClearCompleted");
     const btnToggleAll = document.getElementById("btnToggleAll");
 
-    const todoList = [];
+    let todoList = [];
 
     let viewedTodoList = todoList;
 
@@ -58,13 +58,31 @@ window.onload = () => {
 
         const title = document.createElement("h5");
 
+        const btnDeleteContainer = document.createElement("div");
+
+        const btnDelete = document.createElement("button");
+        const btnP = document.createElement("p");
+
+        btnP.appendChild(document.createTextNode("&#10006;"));
+        btnDelete.appendChild(btnP);
+
+        const firstContainer = document.createElement("div");
+        const secondContainer = document.createElement("div");
+
         title.appendChild(document.createTextNode(todo.title));
 
         titleContainer.appendChild(title);
         checkboxContainer.appendChild(checkbox);
 
-        container.appendChild(checkboxContainer);
-        container.appendChild(titleContainer);
+        btnDeleteContainer.appendChild(btnDelete);
+
+        firstContainer.appendChild(checkboxContainer);
+        firstContainer.appendChild(titleContainer);
+
+        secondContainer.appendChild(btnDeleteContainer);
+
+        container.appendChild(firstContainer);
+        container.appendChild(secondContainer);
 
         todosContainer.appendChild(container);
     }
@@ -130,7 +148,13 @@ window.onload = () => {
         }
     }
 
+    function clearCompleted() {
+        todoList = todoList.filter(todo => !todo.isCompleted);
+        views();
+    }
+
     btnToggleAll.onclick = toggleAll;
+    btnClearCompleted.onclick = clearCompleted;
 
     btnAll.onclick = toggleTab(btnAll, "All");
     btnActive.onclick = toggleTab(btnActive, "Active");

@@ -23,7 +23,14 @@ body {
 
 .todo {
     display: flex;
+    flex-direction: row;
+    justify-content: space-between;
     padding: 3px;
+}
+
+.todo div {
+    display: flex;
+    flex-direction: row;
 }
 
 .todo_checkbox {
@@ -63,3 +70,5 @@ body {
 .no_visible {
     visibility: hidden;
 }
+
+
