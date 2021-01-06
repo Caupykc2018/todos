@@ -14,7 +14,7 @@ body {
     width: 100%;
 }
 
-#title {
+.title {
     font-size: 100px;
     font-weight: 100;
     text-align: center;
@@ -53,17 +53,17 @@ body {
     padding: 3px;
 }
 
-#text_counting {
+.text_counting {
     display: flex;
     flex-direction: row;
 }
 
-#input_bar {
+.input_bar {
     display: flex;
     background-color: white;
 }
 
-#input_bar * {
+.input_bar * {
     margin: 2px;
     outline: none;
 }
@@ -88,13 +88,26 @@ body {
     display: none;
 }
 
-#btnToggleAll {
+.btnToggleAll {
     background-color: white;
     border: 0;
 }
 
-#inputTitle {
+.inputTitle {
     width: 100%;
     border: 0;
+    font-size: 24px;
+}
+
+.desc_counter {
+    margin-left: 2px; 
+    margin-right: 2px;
+}
+
+.btn_complete {
+    width: 100%;
+}
+
+.icon_toggle {
     font-size: 24px;
 }

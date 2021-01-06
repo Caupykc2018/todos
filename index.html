@@ -5,24 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <script src="const.js"></script>
+    <script src="todo.js"></script>
+    <script src="todoList.js"></script>
     <script src="engine.js"></script>
+    <script src="script.js"></script>
     <title>Document</title>
 </head>
 <body>
     <div class="root">
-        <h1 id="title">todos</h1>
+        <h1 class="title">todos</h1>
         <div>
-            <div id="input_bar">
-                <button id="btnToggleAll"><i class='fas fa-chevron-down' style='font-size:24px'></i></button>
-                <input type="text" id="inputTitle" placeholder="What needs to be done?"/>
+            <div id="input_bar" class="input_bar">
+                <button id="btnToggleAll" class="btnToggleAll"><i class='fas fa-chevron-down icon_toggle'></i></button>
+                <input type="text" id="inputTitle" class="inputTitle" placeholder="What needs to be done?" class="inputTitle"/>
             </div>
             <div class="main">
                 <div id="todos"></div>
                 <div>
                     <div class="bottom_menu_top">
-                        <div id="text_counting">
+                        <div class="text_counting" id="text_counting">
                             <div id="count">0</div>
-                            <div style="margin-left: 2px; margin-right: 2px;">left items</div>
+                            <div class="desc_counter">left items</div>
                         </div>
                         <div>
                             <button class="btn" id="btnAll">All</button>
@@ -30,7 +34,7 @@
                             <button class="btn" id="btnCompleted">Completed</button>
                         </div>
                     </div>
-                    <button id="btnClearCompleted" class="no_visible btn" style="width: 100%;">Clear completed</button>
+                    <button id="btnClearCompleted" class="no_visible btn btn_complete">Clear completed</button>
                 </div>
             </div>
         </div>
