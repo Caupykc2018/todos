@@ -25,7 +25,7 @@ class Todo {
         container.className = "todo";
 
         const checkboxContainer = document.createElement("div");
-        checkboxContainer.className = "todo_checkbox";
+        checkboxContainer.className = "todo_checkbox_container";
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
@@ -33,6 +33,7 @@ class Todo {
         checkbox.className = "checkbox_status";
 
         const titleContainer = document.createElement("div");
+        titleContainer.className = "todo_title_container";
 
         const title = document.createElement("p");
 
