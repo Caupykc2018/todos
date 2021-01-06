@@ -5,10 +5,11 @@ const TABS = {
 }
 
 class Todo {
-    constructor(title) {
-        this.id = new Date();
+    constructor(listRenderElement, title) {
+        this.id = new Date().getTime();
         this.title = title;
         this.isCompleted = false;
+        this.listRenderElement = listRenderElement;
     }
 
     edit(title) {
@@ -19,7 +20,7 @@ class Todo {
         this.isCompleted = !this.isCompleted;
     }
 
-    render(listRenderElement, handleRemove, listRender) {
+    render() {
         const container = document.createElement("div");
         container.className = "todo";
 
@@ -29,11 +30,7 @@ class Todo {
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
         checkbox.checked = this.isCompleted;
-
-        checkbox.addEventListener('change', () => {
-            this.toggleStatus();
-            listRender();
-        });
+        checkbox.className = "checkbox_status";
 
         const titleContainer = document.createElement("div");
 
@@ -43,13 +40,9 @@ class Todo {
         btnDeleteContainer.style.visibility = "hidden";
 
         const btnDelete = document.createElement("button");
-        
-        btnDelete.className = "btn_delete";
+        btnDelete.id = this.id.toString();
 
-        btnDelete.onclick = () => {
-            handleRemove();
-            listRender();
-        }
+        btnDelete.className = "btn_delete";
 
         const btnIcon = document.createElement("i");
         btnIcon.className = "fa fa-times";
@@ -74,32 +67,34 @@ class Todo {
         container.appendChild(firstContainer);
         container.appendChild(secondContainer);
 
-        container.onmouseover = () => {
+        container.addEventListener("mouseover", () => {
             btnDeleteContainer.style.visibility = "visible";
-        }
+        });
 
-        container.onmouseout = () => {
+        container.addEventListener("mouseout", () => {
             btnDeleteContainer.style.visibility = "hidden";
-        }
+        });
 
-        listRenderElement.appendChild(container);
+        this.listRenderElement.appendChild(container);
     }
 }
 
 class TodoList {
-    constructor(domNode) {
+    constructor(listRenderElement, counterRenderElement) {
         this.list = [];
         this.viewList = this.list;
-        this.domNode = domNode
+        this.listRenderElement = listRenderElement;
+        this.counterRenderElement = counterRenderElement;
     }
 
     add(title) {
-        this.list.push(new Todo(title));
+        this.list.push(new Todo(this.listRenderElement, title));
+        this.render();
     }
 
     remove(id) {
-        console.log(this);
-        this.list = this.list.filter((todo) => id !== todo.id);
+        this.list = this.list.filter((todo) => todo.id !== id);
+        this.render();
     }
 
     toggleAll() {
@@ -111,10 +106,13 @@ class TodoList {
         else {
             this.list.forEach(todo => todo.toggleStatus());
         }
+
+        this.render();
     }
 
     clearCompleted() {
         this.list = this.list.filter(todo => !todo.isCompleted);
+        this.render();
     }
 
     switchRenderList(tab) {
@@ -129,21 +127,42 @@ class TodoList {
                 this.viewList = this.list.filter(todo => todo.isCompleted);
                 break;
         }
+
+        this.render();
     }
 
-    render(listRenderElement, counterRenderElement) {
-        listRenderElement.innerHTML = "";
-        counterRenderElement.innerHTML = "";
+    renderCounter() {
+        this.counterRenderElement.innerHTML = "";
 
         const countTodosActive = this.list.filter(todo => !todo.isCompleted).length;
-
         const text = document.createTextNode(countTodosActive.toString());
 
-        function configuredRender() { this.render(listRenderElement, counterRenderElement) };
+        this.counterRenderElement.appendChild(text);
+    }
 
-        this.viewList.forEach(todo => todo.render(listRenderElement, counterRenderElement, () => this.remove(todo.id), configuredRender));
+    renderList() {
+        this.listRenderElement.innerHTML = "";
 
-        counterRenderElement.appendChild(text);
+        this.viewList.forEach(todo => todo.render());
+
+        const buttonsDelete = document.getElementsByClassName("btn_delete");
+        const checkboxesStatus = document.getElementsByClassName("checkbox_status");
+
+        for(let index = 0; index < this.viewList.length; index += 1) {
+            buttonsDelete[index].addEventListener("click", () => {
+                this.remove(this.viewList[index].id);
+            });
+
+            checkboxesStatus[index].addEventListener("change", () => {
+                this.viewList[index].toggleStatus();
+                this.render();
+            })
+        }
+    }
+
+    render() {
+        this.renderList();
+        this.renderCounter();
     }
 }
 
@@ -157,53 +176,32 @@ window.onload = () => {
     const btnClearCompleted = document.getElementById("btnClearCompleted");
     const btnToggleAll = document.getElementById("btnToggleAll");
 
-    let todoList = new TodoList(todosContainer);
+    let todoList = new TodoList(todosContainer, textCount);
 
-    let currentTab = TABS.All;
-
-    let render = () => {
-        todoList.switchRenderList(currentTab);
-        todoList.render(todosContainer, textCount);
-    }
-
-    const handlerInput = (e) => {
+    inputTitle.addEventListener("keypress", (e) => {
         if(!inputTitle.value.trim()) return;
-        if(e.keyCode === 13) {
+        if(e.key === "Enter") {
             todoList.add(inputTitle.value.trim());
             inputTitle.value = "";
-            render();
         }
-    }
+    });
 
-    inputTitle.addEventListener("keypress", handlerInput);
-
-    const toggleAll = () => {
-        todoList.toggleAll();
-        render();
-    }
-
-    const clearCompleted = () => {
-        todoList.clearCompleted();
-        render();
-    }
-
-    const toggleTab = (curBtn, tab) => {
-        const allBtn = [btnAll, btnActive, btnCompleted].filter(btn => btn.id !== curBtn.id);
+    const toggleTab = (currentBtn, tab) => {
+        const allBtn = [btnAll, btnActive, btnCompleted].filter(btn => btn.id !== currentBtn.id);
 
         return () => {
             allBtn.forEach(btn => btn.classList.contains("current_btn") && btn.classList.toggle("current_btn"));
-            curBtn.classList.toggle("current_btn");
-            currentTab = tab;
-            render();
+            currentBtn.classList.toggle("current_btn");
+            todoList.switchRenderList(tab);
         }
     }
 
-    btnToggleAll.onclick = toggleAll;
-    btnClearCompleted.onclick = clearCompleted;
+    btnToggleAll.addEventListener("click", todoList.toggleAll);
+    btnClearCompleted.addEventListener("click", todoList.clearCompleted);
 
-    btnAll.onclick = toggleTab(btnAll, TABS.All);
-    btnActive.onclick = toggleTab(btnActive, TABS.Active);
-    btnCompleted.onclick = toggleTab(btnCompleted, TABS.Completed);
+    btnAll.addEventListener("click", toggleTab(btnAll, TABS.All));
+    btnActive.addEventListener("click", toggleTab(btnAll, TABS.Active));
+    btnCompleted.addEventListener("click", toggleTab(btnAll, TABS.Completed));
 }
         // const countTodos = this.list.length;
         // const isVisibleBtnClearCompleted = btnClearCompleted.classList.contains("no_visible");
