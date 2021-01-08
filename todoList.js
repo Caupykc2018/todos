@@ -1,10 +1,12 @@
 class TodoList {
-    constructor(listRenderElement, counterRenderElement) {
+    constructor(listRenderElement, counterRenderElement, btnToggleAll) {
         this.list = [];
         this.viewList = [];
         this.listRenderElement = listRenderElement;
         this.counterRenderElement = counterRenderElement;
         this.currentTab = TABS.All;
+        this.btnToggleAll = btnToggleAll;
+        this.bottomMenu = document.getElementsByClassName("bottom_menu")[0];
     }
 
     add(title) {
@@ -76,11 +78,11 @@ class TodoList {
 
         this.reloadViewList();
 
-        let editingTodo; 
+        let editingTodo;
 
         this.viewList.forEach(todo => {
             if(todo.isEdit) editingTodo = todo;
-            
+
             todo.render();
         });
 
@@ -95,7 +97,7 @@ class TodoList {
             editingTodo.toggleEditStatus();
             this.render();
         });
-        
+
         inputEdit?.addEventListener("keypress", (e) => {
             if(!inputEdit.value.trim()) return;
             if(e.key === "Enter") {
@@ -104,26 +106,46 @@ class TodoList {
             }
         });
 
-        for(let index = 0; index < this.viewList.length; index += 1) {
-            !this.viewList[index].isEdit && containersTodo[index].addEventListener("dblclick", () => {
+        this.viewList.forEach((todo, index) => {
+            !todo.isEdit && containersTodo[index].addEventListener("dblclick", () => {
                 editingTodo?.toggleEditStatus();
-                this.viewList[index].toggleEditStatus();
+                todo.toggleEditStatus();
                 this.render();
             });
 
             buttonsDelete[index].addEventListener("click", () => {
-                this.remove(this.viewList[index].id);
+                this.remove(todo.id);
             });
 
             checkboxesStatus[index].addEventListener("change", () => {
-                this.viewList[index].toggleStatus();
+                todo.toggleStatus();
                 this.render();
             });
+        });
+    }
+
+    renderControlElements(){
+        if(this.list.length) {
+            this.bottomMenu.style.display = "flex";
+            this.btnToggleAll.style.visibility = "visible";
+            if(this.list.filter(todo => todo.isCompleted).length === this.list.length) {
+                this.btnToggleAll.style.color = "black";
+            }
+            else {
+                this.btnToggleAll.style.color = "rgba(175, 47, 47, 0.15)";
+            }
+        }
+        else {
+            this.bottomMenu.style.display = "none";
+            this.btnToggleAll.style.visibility = "hidden";
         }
     }
 
     render() {
+        this.renderControlElements();
         this.renderList();
         this.renderCounter();
     }
+
+
 }

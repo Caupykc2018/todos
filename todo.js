@@ -28,32 +28,35 @@ class Todo {
         checkboxContainer.className = "todo_checkbox_container";
 
         const checkbox = document.createElement("input");
+        checkbox.className = "checkbox_status";
         checkbox.type = "checkbox";
         checkbox.checked = this.isCompleted;
-        checkbox.className = "checkbox_status";
+
+        if(this.isEdit) {
+            checkbox.style.visibility = "hidden";
+        }
 
         const titleContainer = document.createElement("div");
         titleContainer.className = "todo_title_container";
 
         const title = document.createElement("p");
+        title.className = "todo_title";
 
         const inputContainer = document.createElement("div");
-        inputContainer.style.width = "100%";
+        inputContainer.className = "input_edit_container";
 
         const inputEditTitle = document.createElement("input");
         inputEditTitle.id = "input_edit";
-        inputEditTitle.style.outline = 0;
-        inputEditTitle.style.fontSize = 15;
-        inputEditTitle.style.border = 0;
+        inputEditTitle.className = "input_edit";
         inputEditTitle.type = "text";
         inputEditTitle.value = this.title;
 
         const btnDeleteContainer = document.createElement("div");
+        btnDeleteContainer.className = "btn_delete_container";
         btnDeleteContainer.style.display = "none";
 
         const btnDelete = document.createElement("button");
         btnDelete.id = this.id.toString();
-
         btnDelete.className = "btn_delete";
 
         const btnIcon = document.createElement("i");
@@ -62,9 +65,17 @@ class Todo {
         btnDelete.appendChild(btnIcon);
 
         const flexBoxLeftContainer = document.createElement("div");
+        flexBoxLeftContainer.className = "todo_left_flexbox";
+
         const flexBoxRightContainer = document.createElement("div");
+        flexBoxRightContainer.className = "todo_right_flexbox";
 
         title.appendChild(document.createTextNode(this.title));
+
+        if(this.isCompleted) {
+            title.style.textDecoration = "line-through";
+            title.style.color = "lightgray";
+        }
 
         !this.isEdit && titleContainer.appendChild(title);
 
@@ -75,7 +86,6 @@ class Todo {
         btnDeleteContainer.appendChild(btnDelete);
 
         flexBoxLeftContainer.appendChild(checkboxContainer);
-        
         flexBoxLeftContainer.appendChild(!this.isEdit ? titleContainer : inputContainer);
 
         flexBoxRightContainer.appendChild(btnDeleteContainer);

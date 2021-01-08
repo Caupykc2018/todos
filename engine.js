@@ -8,17 +8,19 @@ class Engine {
         this.textCount = document.getElementById("count");
         this.btnClearCompleted = document.getElementById("btnClearCompleted");
         this.btnToggleAll = document.getElementById("btnToggleAll");
-        
-        this.todoList = new TodoList(this.todosContainer, this.textCount);
+
+        this.todoList = new TodoList(this.todosContainer, this.textCount, this.btnToggleAll);
 
     }
 
     toggleTab(currentBtn, tab) {
         const allBtn = [
-            this.btnAll, 
-            this.btnActive, 
+            this.btnAll,
+            this.btnActive,
             this.btnCompleted
         ].filter(btn => btn.id !== currentBtn.id);
+
+        console.log(allBtn);
 
         return () => {
             allBtn.forEach(btn => btn.classList.contains("current_btn") && btn.classList.toggle("current_btn"));
@@ -30,10 +32,10 @@ class Engine {
     init() {
         this.btnToggleAll.addEventListener("click", () => this.todoList.toggleAll());
         this.btnClearCompleted.addEventListener("click", () => this.todoList.clearCompleted());
-    
-        this.btnAll.addEventListener("click", this.toggleTab(btnAll, TABS.All));
-        this.btnActive.addEventListener("click", this.toggleTab(btnAll, TABS.Active));
-        this.btnCompleted.addEventListener("click", this.toggleTab(btnAll, TABS.Completed));
+
+        this.btnAll.addEventListener("click", this.toggleTab(this.btnAll, TABS.All));
+        this.btnActive.addEventListener("click", this.toggleTab(this.btnActive, TABS.Active));
+        this.btnCompleted.addEventListener("click", this.toggleTab(this.btnCompleted, TABS.Completed));
 
         this.inputTitle.addEventListener("keypress", (e) => {
             if(!this.inputTitle.value.trim()) return;
@@ -42,6 +44,8 @@ class Engine {
                 this.inputTitle.value = "";
             }
         });
+
+        this.todoList.render();
     }
 }
-        
+
