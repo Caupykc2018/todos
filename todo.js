@@ -1,10 +1,14 @@
 class Todo {
-    constructor(listRenderElement, title) {
-        this.id = new Date().getTime();
+    constructor( 
+        title, 
+        id = new Date().getTime(), 
+        isCompleted = false
+    ) {
+        this.id = id;
         this.title = title;
-        this.isCompleted = false;
+        this.isCompleted = isCompleted;
         this.isEdit = false;
-        this.listRenderElement = listRenderElement;
+        this.listRenderElement = document.getElementById("todos");
     }
 
     edit(title) {

@@ -1,59 +1,51 @@
 class TodoList {
-    constructor(listRenderElement, counterRenderElement, btnToggleAll) {
-        this.list = [];
-        this.viewList = [];
-        this.listRenderElement = listRenderElement;
+    constructor(counterRenderElement, btnToggleAll) {
+        this.listRenderElement = document.getElementById("todos");
+        
         this.counterRenderElement = counterRenderElement;
-        this.currentTab = TABS.All;
         this.btnToggleAll = btnToggleAll;
         this.bottomMenu = document.getElementsByClassName("bottom_menu")[0];
     }
 
+    setStore(store) {
+        this.store = store;
+        this.viewList = this.store.getStore().todos;
+    }
+
+    getStoreTodos() {
+        return this.store.getStore().todos;
+    }
+
     add(title) {
-        this.list.push(new Todo(this.listRenderElement, title));
-        this.render();
+        this.store.dispatch("ADD", {todo: new Todo(title)});
     }
 
     remove(id) {
-        this.list = this.list.filter((todo) => todo.id !== id);
-        this.render();
+        this.store.dispatch("DELETE", {id: id});
     }
 
     toggleAll() {
-        const todosActive = this.list.filter(todo => !todo.isCompleted);
-
-        if(todosActive.length) {
-            todosActive.forEach(todo => todo.toggleStatus());
-        }
-        else {
-            this.list.forEach(todo => todo.toggleStatus());
-        }
-
-        this.render();
+        this.store.dispatch("TOGGLE_ALL_STATUS");
     }
 
     clearCompleted() {
-        this.list = this.list.filter(todo => !todo.isCompleted);
-        this.render();
+        this.store.dispatch("CLEAR_COMPLETED");
     }
 
     reloadViewList() {
-        switch (this.currentTab) {
+        switch (this.store.getStore().currentTab) {
             case TABS.All:
-                this.viewList = [...this.list];
+                this.viewList = [...this.getStoreTodos()];
                 break;
             case TABS.Active:
-                this.viewList = this.list.filter(todo => !todo.isCompleted);
+                this.viewList = this.getStoreTodos().filter(todo => !todo.isCompleted);
                 break;
             case TABS.Completed:
-                this.viewList = this.list.filter(todo => todo.isCompleted);
+                this.viewList = this.getStoreTodos().filter(todo => todo.isCompleted);
                 break;
+            default:
+                this.viewList = [...this.getStoreTodos()];
         }
-    }
-
-    switchViewList(tab) {
-        this.currentTab = tab;
-        this.render();
     }
 
     renderCounter() {
@@ -61,12 +53,12 @@ class TodoList {
 
         const btnClearCompleted = document.getElementById("btnClearCompleted");
 
-        const countTodosActive = this.list.filter(todo => !todo.isCompleted).length;
+        const countTodosActive = this.getStoreTodos().filter(todo => !todo.isCompleted).length;
         const text = document.createTextNode(countTodosActive.toString());
 
         const isVisibleBtnClearCompleted = btnClearCompleted.classList.contains("no_visible");
 
-        if(!!(this.list.length - countTodosActive) === isVisibleBtnClearCompleted) {
+        if(!!(this.getStoreTodos().length - countTodosActive) === isVisibleBtnClearCompleted) {
             btnClearCompleted.classList.toggle("no_visible");
         }
 
@@ -78,10 +70,12 @@ class TodoList {
 
         this.reloadViewList();
 
-        let editingTodo;
+        let indexEditingTodo;
 
-        this.viewList.forEach(todo => {
-            if(todo.isEdit) editingTodo = todo;
+        this.viewList.forEach((todo, index) => {
+            if(todo.isEdit) {
+                indexEditingTodo = index;
+            }
 
             todo.render();
         });
@@ -94,23 +88,20 @@ class TodoList {
         inputEdit?.focus();
 
         inputEdit?.addEventListener("focusout", (e) => {
-            editingTodo.toggleEditStatus();
-            this.render();
+            this.store.dispatch("TOGGLE_EDIT", {index: indexEditingTodo});
         });
 
         inputEdit?.addEventListener("keypress", (e) => {
             if(!inputEdit.value.trim()) return;
             if(e.key === "Enter") {
-                editingTodo.edit(inputEdit.value.trim());
-                this.render();
+                this.store.dispatch("edit", {index: indexEditingTodo, title: inputEdit.value.trim()});
             }
         });
 
         this.viewList.forEach((todo, index) => {
             !todo.isEdit && containersTodo[index].addEventListener("dblclick", () => {
-                editingTodo?.toggleEditStatus();
-                todo.toggleEditStatus();
-                this.render();
+                indexEditingTodo && this.store.dispatch("TOGGLE_EDIT", {index: indexEditingTodo});
+                this.store.dispatch("TOGGLE_EDIT", {index: index});
             });
 
             buttonsDelete[index].addEventListener("click", () => {
@@ -118,17 +109,16 @@ class TodoList {
             });
 
             checkboxesStatus[index].addEventListener("change", () => {
-                todo.toggleStatus();
-                this.render();
+                this.store.dispatch("TOGGLE_STATUS", {index: index});
             });
         });
     }
 
     renderControlElements(){
-        if(this.list.length) {
+        if(this.getStoreTodos().length) {
             this.bottomMenu.style.display = "flex";
             this.btnToggleAll.style.visibility = "visible";
-            if(this.list.filter(todo => todo.isCompleted).length === this.list.length) {
+            if(this.getStoreTodos().filter(todo => todo.isCompleted).length === this.getStoreTodos().length) {
                 this.btnToggleAll.style.color = "black";
             }
             else {
