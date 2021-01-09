@@ -13,7 +13,6 @@ body {
     flex-direction: column;
     align-items: center;
     width: 100%;
-    padding-top: 15px;
 }
 
 .app {
@@ -189,4 +188,52 @@ body {
 .input_edit_container {
     display: flex;
     width: 100%;
+}
+
+.menu {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    background-color: azure;
+    padding: 10px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.account {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background-color: white;
+    padding: 10px;
+    margin-right: 10px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.log_out {
+    background-color: #FF7F50;
+    padding: 10px;
+    outline: none;
+    border-radius: 40%;
+    border: none;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.log_out:active {
+    box-shadow: inset 1px 2px 8px rgba(0, 0, 0, 0.10),
+    0 2px 4px 0 rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    display: flex;
+    padding: 5px;
+}
+
+.logo_img {
+    object-fit: contain;
+    width: 150px;
+}
+
+.login {
+    padding: 0 5px 0 2px;
+    font-weight: bold;
 }

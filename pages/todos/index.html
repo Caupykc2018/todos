@@ -5,17 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="style.css">
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
-    <script src="const.js"></script>
-    <script src="eventEmitter.js"></script>
-    <script src="todo.js"></script>
-    <script src="storage/store.js"></script>
-    <script src="todoList.js"></script>
+    <script src="../../const.js"></script>
+    <script src="../../eventEmitter.js"></script>
+    <script src="../../models/user.js"></script>
+    <script src="../../models/todo.js"></script>
+    <script src="../../storage/store.js"></script>
     <script src="engine.js"></script>
-    <script src="script.js"></script>
-    <title>Document</title>
+    <title>Todos</title>
 </head>
 <body>
     <div class="root">
+
+        <div class="menu">
+            <div class="logo">
+                <img class="logo_img" src="https://upload.wikimedia.org/wikipedia/commons/c/c4/Frente_de_Todos_logo.svg" alt="logo"/>
+            </div>
+            <div class="account">
+                <div>Hi, </div>
+                <div class="login" id="display_name"></div>
+                <button id="log_out" class="log_out">Log Out</button>
+            </div>
+        </div>
         <h1 class="title">todos</h1>
         <div class="app">
             <div id="input_bar" class="input_bar">
