@@ -22,11 +22,16 @@ class Engine {
         return alert("Repeat password field is empty");
       }
 
-      this.store.getStore().users.forEach(user => {
-        if(user.login === this.inputLogin.value) {
-          return alert("This login is exist");
-        }
-      });
+      try {
+        this.store.getStore().users.forEach(user => {
+          if(user.login === this.inputLogin.value) {
+            throw {};
+          }
+        });
+      }
+      catch (e) {
+        return alert("This login is exist");
+      }
 
       if(this.inputPassword.value !== this.inputRepeatPassword.value) {
         return alert("Passwords don't match");

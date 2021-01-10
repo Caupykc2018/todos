@@ -195,7 +195,6 @@ body {
     justify-content: space-between;
     width: 100%;
     background-color: azure;
-    padding: 10px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
@@ -205,7 +204,7 @@ body {
     align-items: center;
     background-color: white;
     padding: 10px;
-    margin-right: 10px;
+    margin: 10px;
     box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2);
 }
 
@@ -226,6 +225,7 @@ body {
 .logo {
     display: flex;
     padding: 5px;
+    margin: 10px;
 }
 
 .logo_img {
