@@ -130,7 +130,6 @@ class Store {
         this.store = this.reducer(action, payload);
 
         this.save();
-        this.render();
     }
 
     save() {

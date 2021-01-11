@@ -12,19 +12,12 @@ class Engine {
         this.displayName = document.getElementById("display_name");
         this.bottomMenu = document.getElementsByClassName("bottom_menu")[0];
 
-        this.store = new Store(() => this.render());
+        this.store = new Store();
+        this.connector = new Connector(this.store, this);
 
-        this.displayName.appendChild(document.createTextNode(this.store.getStore().currentUser.login || ""));
+        this.dispatch = this.connector.useDispatch();
 
         this.eventEmmiter = new EventEmitter();
-    }
-
-    getStoreTodos() {
-        return this.store.getStore().todos[this.store.getStore().currentUser.id];
-    }
-
-    getStoreViewTodos() {
-        return this.store.getStore().viewTodos;
     }
 
     renderCounter() {
@@ -32,12 +25,12 @@ class Engine {
 
         const btnClearCompleted = document.getElementById("btnClearCompleted");
 
-        const countTodosActive = this.getStoreTodos().filter(todo => !todo.isCompleted).length;
+        const countTodosActive = this.todos.filter(todo => !todo.isCompleted).length;
         const text = document.createTextNode(countTodosActive.toString());
 
         const isVisibleBtnClearCompleted = btnClearCompleted.classList.contains("no_visible");
 
-        if(!!(this.getStoreTodos().length - countTodosActive) === isVisibleBtnClearCompleted) {
+        if(!!(this.todos.length - countTodosActive) === isVisibleBtnClearCompleted) {
             btnClearCompleted.classList.toggle("no_visible");
         }
 
@@ -133,7 +126,7 @@ class Engine {
 
         let indexEditingTodo;
 
-        this.getStoreViewTodos().forEach((todo, index) => {
+        this.viewTodos.forEach((todo, index) => {
             if(todo.isEdit) {
                 indexEditingTodo = index;
             }
@@ -149,40 +142,40 @@ class Engine {
         inputEdit?.focus();
 
         inputEdit?.addEventListener("focusout", () => {
-            this.store.dispatch("TOGGLE_EDIT", {index: indexEditingTodo});
-            this.store.dispatch("RELOAD_VIEW_TODOS");
+            this.dispatch({action: "TOGGLE_EDIT", payload: {index: indexEditingTodo}});
+            this.dispatch({action: "RELOAD_VIEW_TODOS"});
         });
 
         inputEdit?.addEventListener("keypress", (e) => {
             if(!inputEdit.value.trim()) return;
             if(e.key === "Enter") {
-                this.store.dispatch("EDIT", {index: indexEditingTodo, title: inputEdit.value.trim()});
+                this.dispatch({action: "EDIT", payload: {index: indexEditingTodo, title: inputEdit.value.trim()}});
             }
         });
 
-        this.getStoreViewTodos().forEach((todo, index) => {
+        this.viewTodos.forEach((todo, index) => {
             !todo.isEdit && containersTodo[index].addEventListener("dblclick", () => {
-                indexEditingTodo && this.store.dispatch("TOGGLE_EDIT", {index: indexEditingTodo});
-                this.store.dispatch("TOGGLE_EDIT", {index: index});
+                indexEditingTodo && this.dispatch({action: "TOGGLE_EDIT", payload: {index: indexEditingTodo}});
+                this.dispatch({action: "TOGGLE_EDIT", payload: {index: index}});
             });
 
             buttonsDelete[index].addEventListener("click", () => {
-                this.store.dispatch("DELETE", {id: todo.id});
-                this.store.dispatch("RELOAD_VIEW_TODOS");
+                this.dispatch({action: "DELETE", payload: {id: todo.id}});
+                this.dispatch({action: "RELOAD_VIEW_TODOS"});
             });
 
             checkboxesStatus[index].addEventListener("change", () => {
-                this.store.dispatch("TOGGLE_STATUS", {index: index});
-                this.store.dispatch("RELOAD_VIEW_TODOS");
+                this.dispatch({action: "TOGGLE_STATUS", payload: {index: index}});
+                this.dispatch({action: "RELOAD_VIEW_TODOS"});
             });
         });
     }
 
     renderControlElements(){
-        if(this.getStoreTodos().length) {
+        if(this.todos.length) {
             this.bottomMenu.style.display = "flex";
             this.btnToggleAll.style.visibility = "visible";
-            if(this.getStoreTodos().filter(todo => todo.isCompleted).length === this.getStoreTodos().length) {
+            if(this.todos.filter(todo => todo.isCompleted).length === this.todos.length) {
                 this.btnToggleAll.style.color = "black";
             }
             else {
@@ -196,7 +189,11 @@ class Engine {
     }
 
     render() {
-        if(this.store.getStore().currentUser.id) {
+        this.currentUser = this.connector.useSelector(state => state.currentUser);
+        this.todos = this.connector.useSelector(state => state.todos[this.currentUser.id]);
+        this.viewTodos = this.connector.useSelector(state => state.viewTodos);
+        
+        if(this.currentUser.id) {
             this.renderControlElements();
             this.renderList();
             this.renderCounter();
@@ -212,23 +209,29 @@ class Engine {
 
         allBtn.forEach(btn => btn.classList.contains("current_btn") && btn.classList.toggle("current_btn"));
         button.classList.toggle("current_btn");
-        this.store.dispatch("SET_TAB", {tab: tab});
-        this.store.dispatch("RELOAD_VIEW_TODOS");
+        this.dispatch({action: "SET_TAB", payload: {tab: tab}});
+        this.dispatch({action: "RELOAD_VIEW_TODOS"});
     }
 
     init() {
-        if(!this.store.getStore().currentUser.id) {
-            window.location.href = "../../../todos/pages/login";
+        this.currentUser = this.connector.useSelector(state => state.currentUser);
+        this.currentTab = this.connector.useSelector(state => state.currentTab[this.currentUser.id]);
+        this.todos = this.connector.useSelector(state => state.todos[this.currentUser.id]);
+        
+        if(!this.currentUser.id) {
+            window.location.href = "../../../pages/login";
         }
 
+        this.displayName.appendChild(document.createTextNode(this.currentUser.login || ""));
+
         this.eventEmmiter.on("toggle-all", () => {
-            this.store.dispatch("TOGGLE_ALL_STATUS");
-            this.store.dispatch("RELOAD_VIEW_TODOS");
+            this.dispatch({action: "TOGGLE_ALL_STATUS"});
+            this.dispatch({action: "RELOAD_VIEW_TODOS"});
         });
 
         this.eventEmmiter.on("clear-completed", () => {
-            this.store.dispatch("CLEAR_COMPLETED");
-            this.store.dispatch("RELOAD_VIEW_TODOS");
+            this.dispatch({action: "CLEAR_COMPLETED"});
+            this.dispatch({action: "RELOAD_VIEW_TODOS"});
         });
 
         this.eventEmmiter.on("toggle-tab", (data) => {
@@ -238,8 +241,8 @@ class Engine {
         this.eventEmmiter.on("keypress-input", ({input, key}) => {
             if(!input.value.trim()) return;
             if(key === "Enter") {
-                this.store.dispatch("ADD", {todo: new Todo(input.value.trim())});
-                this.store.dispatch("RELOAD_VIEW_TODOS");
+                this.dispatch({action: "ADD", payload: {todo: new Todo(input.value.trim())}});
+                this.dispatch({action: "RELOAD_VIEW_TODOS"});
                 input.value = "";
             }
         });
@@ -249,12 +252,11 @@ class Engine {
         btnTabs[TABS.Active] = this.btnActive;
         btnTabs[TABS.Completed] = this.btnCompleted;
 
-        this.eventEmmiter.emit("toggle-tab", {button: btnTabs[this.store.getStore().currentTab[this.store.getStore().currentUser.id]], tab: this.store.getStore().currentTab[this.store.getStore().currentUser.id]});
+        this.eventEmmiter.emit("toggle-tab", {button: btnTabs[this.currentTab], tab: this.currentTab});
 
         this.btnLogOut.addEventListener("click", () => {
-            this.store.dispatch("LOG_OUT");
-            console.log(this.store.getStore());
-            window.location.href = "../../../todos/pages/login";
+            this.dispatch({action: "LOG_OUT"});
+            window.location.href = "../../../pages/login";
         });
 
         this.btnToggleAll.addEventListener("click", () => this.eventEmmiter.emit("toggle-all"));

@@ -4,7 +4,15 @@ class Engine {
     this.inputPassword = document.getElementById("input_password");
     this.submitButton = document.getElementById("submit_button");
 
-    this.store = new Store(() => undefined);
+    this.store = new Store();
+    this.connector = new Connector(this.store, this);
+
+    this.dispatch = this.connector.useDispatch();
+    this.users = this.connector.useSelector(state => state.users);
+  }
+
+  render() {
+
   }
 
   init() {
@@ -20,7 +28,7 @@ class Engine {
       let currentUser;
 
       try{
-        this.store.getStore().users.forEach(user => {
+        this.users.forEach(user => {
           if(user.login === this.inputLogin.value) {
             if(user.password === this.inputPassword.value) {
               currentUser = user;
@@ -39,8 +47,8 @@ class Engine {
         return alert("Incorrect login or password");
       }
 
-      this.store.dispatch("LOGIN", {user: currentUser});
-      window.location.href = "../../../todos/pages/todos";
+      this.dispatch({action:"LOGIN", payload: {user: currentUser}});
+      window.location.href = "../../../pages/todos";
     });
   }
 }
