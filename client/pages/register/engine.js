@@ -9,15 +9,41 @@ class Engine {
     this.connector = new Connector(this.store, this);
 
     this.dispatch = this.connector.useDispatch();
-    this.users = this.connector.useSelector(state => state.users);
+  }
+
+  async register(login, password) {
+    const response = await fetch("http://localhost:3001/api/register", {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        login: login,
+        password: password
+      })
+    });
+
+    const data = await response.json();
+
+    if(response.ok) {
+      this.dispatch({action: "SET_CURRENT_USER", payload: {user: data}});
+    }
+    else {
+      alert(data.message);
+    }
   }
 
   render() {
+    this.currentUser = this.connector.useSelector(state => state.currentUser);
 
+    if(this.currentUser.id) {
+      window.location.href = "../../../../client/pages/todos";
+    }
   }
 
   init() {
-    this.submitButton.addEventListener("click", () => {
+    this.submitButton.addEventListener("click", async () => {
       if(!this.inputLogin.value) {
         return alert("Login field is empty");
       }
@@ -30,23 +56,7 @@ class Engine {
         return alert("Repeat password field is empty");
       }
 
-      try {
-        this.users.forEach(user => {
-          if(user.login === this.inputLogin.value) {
-            throw {};
-          }
-        });
-      }
-      catch (e) {
-        return alert("This login is exist");
-      }
-
-      if(this.inputPassword.value !== this.inputRepeatPassword.value) {
-        return alert("Passwords don't match");
-      }
-
-      this.dispatch({action: "REGISTER", payload: {user: new User(this.inputLogin.value, this.inputPassword.value)}});
-      window.location.href = "../../../pages/todos";
+      await this.register(this.inputLogin.value, this.inputPassword.value);
     });
   }
 }

@@ -8,15 +8,40 @@ class Engine {
     this.connector = new Connector(this.store, this);
 
     this.dispatch = this.connector.useDispatch();
-    this.users = this.connector.useSelector(state => state.users);
+  }
+
+  async login(login, password) {
+    const response = await fetch("http://localhost:3001/api/login", {
+      method: "POST",
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        login: login,
+        password: password
+      })
+    });
+
+    const data = await response.json();
+    if(response.ok) {
+      this.dispatch({action: "SET_CURRENT_USER", payload: {user: data}});
+    }
+    else {
+      alert(data.message);
+    }
   }
 
   render() {
+    this.currentUser = this.connector.useSelector(state => state.currentUser);
 
+    if(this.currentUser.id) {
+      window.location.href = "../../../../client/pages/todos";
+    }
   }
 
   init() {
-    this.submitButton.addEventListener("click", () => {
+    this.submitButton.addEventListener("click", async () => {
       if(!this.inputLogin.value) {
         return alert("Login field is empty");
       }
@@ -25,30 +50,7 @@ class Engine {
         return alert("Password field is empty");
       }
 
-      let currentUser;
-
-      try{
-        this.users.forEach(user => {
-          if(user.login === this.inputLogin.value) {
-            if(user.password === this.inputPassword.value) {
-              currentUser = user;
-            }
-            else {
-              throw {};
-            }
-          }
-        });
-      }
-      catch (e) {
-
-      }
-
-      if(!currentUser) {
-        return alert("Incorrect login or password");
-      }
-
-      this.dispatch({action:"LOGIN", payload: {user: currentUser}});
-      window.location.href = "../../../pages/todos";
+      await this.login(this.inputLogin.value, this.inputPassword.value);
     });
   }
 }

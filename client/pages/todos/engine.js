@@ -20,6 +20,110 @@ class Engine {
         this.eventEmmiter = new EventEmitter();
     }
 
+    async getAllTodos(userId) {
+        const response = await fetch("http://localhost:3001/api/todos", {
+            method: "GET",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'user-id': userId
+            }
+        });
+    
+        const data = await response.json();
+        if(response.ok) {
+            this.dispatch({action: "INITIAL_TODOS", payload: {todos: data}});
+        }
+        else {
+            alert(data.message);
+        }
+    }
+
+    async addTodo(userId, title) {
+        const response = await fetch("http://localhost:3001/api/todos", {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'user-id': userId
+            },
+            body: JSON.stringify({
+                title: title
+            })
+        });
+    
+        const data = await response.json();
+        if(response.ok) {
+            this.dispatch({action: "ADD_TODO", payload: {todo: data}});
+        }
+        else {
+            alert(data.message);
+        }
+    }
+
+    async editTodo(todoId, title) {
+        const response = await fetch(`http://localhost:3001/api/todos/${todoId}`, {
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'user-id': this.currentUser.id
+            },
+            body: JSON.stringify({
+                title: title
+            })
+        });
+    
+        const data = await response.json();
+        if(response.ok) {
+            this.dispatch({action: "SET_TODO", payload: {todo: data}});
+        }
+        else {
+            alert(data.message);
+        }
+    }
+
+    async removeTodo(todoId) {
+        const response = await fetch(`http://localhost:3001/api/todos/${todoId}`, {
+            method: "DELETE",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'user-id': this.currentUser.id
+            }
+        });
+    
+        const data = await response.json();
+        if(response.ok) {
+            this.dispatch({action: "REMOVE_TODO", payload: {todo: data}});
+        }
+        else {
+            alert(data.message);
+        }
+    }
+
+    async toggleTodo(todoId, isCompleted) {
+        const response = await fetch(`http://localhost:3001/api/todos/${todoId}`, {
+            method: "PUT",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'user-id': this.currentUser.id
+            },
+            body: JSON.stringify({
+                isCompleted: isCompleted
+            })
+        });
+    
+        const data = await response.json();
+        if(response.ok) {
+            this.dispatch({action: "SET_TODO", payload: {todo: data}});
+        }
+        else {
+            alert(data.message);
+        }
+    } 
+
     renderCounter() {
         this.textCount.innerHTML = "";
 
@@ -73,7 +177,7 @@ class Engine {
         btnDeleteContainer.style.display = "none";
 
         const btnDelete = document.createElement("button");
-        btnDelete.id = todo.id.toString();
+        btnDelete.id = todo.id;
         btnDelete.className = "btn_delete";
 
         const btnIcon = document.createElement("i");
@@ -159,13 +263,13 @@ class Engine {
                 this.dispatch({action: "TOGGLE_EDIT", payload: {index: index}});
             });
 
-            buttonsDelete[index].addEventListener("click", () => {
-                this.dispatch({action: "DELETE", payload: {id: todo.id}});
+            buttonsDelete[index].addEventListener("click", async () => {
+                await this.removeTodo(todo._id);
                 this.dispatch({action: "RELOAD_VIEW_TODOS"});
             });
 
-            checkboxesStatus[index].addEventListener("change", () => {
-                this.dispatch({action: "TOGGLE_STATUS", payload: {index: index}});
+            checkboxesStatus[index].addEventListener("change", async () => {
+                await this.toggleTodo(todo._id, !todo.isCompleted);
                 this.dispatch({action: "RELOAD_VIEW_TODOS"});
             });
         });
@@ -190,7 +294,7 @@ class Engine {
 
     render() {
         this.currentUser = this.connector.useSelector(state => state.currentUser);
-        this.todos = this.connector.useSelector(state => state.todos[this.currentUser.id]);
+        this.todos = this.connector.useSelector(state => state.todos);
         this.viewTodos = this.connector.useSelector(state => state.viewTodos);
         
         if(this.currentUser.id) {
@@ -213,13 +317,19 @@ class Engine {
         this.dispatch({action: "RELOAD_VIEW_TODOS"});
     }
 
-    init() {
+    async init() {
         this.currentUser = this.connector.useSelector(state => state.currentUser);
         this.currentTab = this.connector.useSelector(state => state.currentTab[this.currentUser.id]);
-        this.todos = this.connector.useSelector(state => state.todos[this.currentUser.id]);
+        this.todos = this.connector.useSelector(state => state.todos);
         
         if(!this.currentUser.id) {
-            window.location.href = "../../../pages/login";
+            window.location.href = "../../../client/pages/login";
+        }
+
+        await this.getAllTodos(this.currentUser.id);
+
+        if(!this.currentTab) {
+            this.dispatch({action: "SET_TAB", payload: {tab: TABS.All}})
         }
 
         this.displayName.appendChild(document.createTextNode(this.currentUser.login || ""));
@@ -238,10 +348,10 @@ class Engine {
             this.toggleTab(data);
         });
 
-        this.eventEmmiter.on("keypress-input", ({input, key}) => {
+        this.eventEmmiter.on("keypress-input", async ({input, key}) => {
             if(!input.value.trim()) return;
             if(key === "Enter") {
-                this.dispatch({action: "ADD", payload: {todo: new Todo(input.value.trim())}});
+                await this.addTodo(this.currentUser.id, input.value.trim())
                 this.dispatch({action: "RELOAD_VIEW_TODOS"});
                 input.value = "";
             }
@@ -272,7 +382,7 @@ class Engine {
     }
 }
 
-window.onload = () => {
+window.onload = async () => {
     const engine = new Engine();
-    engine.init();
+    await engine.init();
 }
