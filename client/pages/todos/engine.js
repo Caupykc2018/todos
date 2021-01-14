@@ -122,7 +122,45 @@ class Engine {
         else {
             alert(data.message);
         }
-    } 
+    }
+
+    async toggleAll() {
+        const response = await fetch(`http://localhost:3001/api/todos/toggle-all`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'user-id': this.currentUser.id
+            }
+        });
+    
+        const data = await response.json();
+        if(response.ok) {
+            this.dispatch({action: "SET_TODOS", payload: {todos: data}});
+        }
+        else {
+            alert(data.message);
+        }
+    }
+
+    async clearCompleted() {
+        const response = await fetch(`http://localhost:3001/api/todos/clear-completed`, {
+            method: "POST",
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'user-id': this.currentUser.id
+            }
+        });
+    
+        const data = await response.json();
+        if(response.ok) {
+            this.dispatch({action: "REMOVE_TODOS", payload: {todos: data}});
+        }
+        else {
+            alert(data.message);
+        }
+    }
 
     renderCounter() {
         this.textCount.innerHTML = "";
@@ -228,11 +266,11 @@ class Engine {
     renderList() {
         this.listRenderElement.innerHTML = "";
 
-        let indexEditingTodo;
+        let editingTodo;
 
-        this.viewTodos.forEach((todo, index) => {
+        this.viewTodos.forEach((todo) => {
             if(todo.isEdit) {
-                indexEditingTodo = index;
+                editingTodo = todo;
             }
 
             this.listRenderElement.appendChild(this.createViewTodo(todo));
@@ -246,31 +284,28 @@ class Engine {
         inputEdit?.focus();
 
         inputEdit?.addEventListener("focusout", () => {
-            this.dispatch({action: "TOGGLE_EDIT", payload: {index: indexEditingTodo}});
-            this.dispatch({action: "RELOAD_VIEW_TODOS"});
+            this.dispatch({action: "TOGGLE_EDIT_STATUS_TODO", payload: {id: editingTodo._id}});
         });
 
-        inputEdit?.addEventListener("keypress", (e) => {
+        inputEdit?.addEventListener("keypress", async (e) => {
             if(!inputEdit.value.trim()) return;
             if(e.key === "Enter") {
-                this.dispatch({action: "EDIT", payload: {index: indexEditingTodo, title: inputEdit.value.trim()}});
+                await this.editTodo(editingTodo._id, inputEdit.value.trim());
             }
         });
 
         this.viewTodos.forEach((todo, index) => {
             !todo.isEdit && containersTodo[index].addEventListener("dblclick", () => {
-                indexEditingTodo && this.dispatch({action: "TOGGLE_EDIT", payload: {index: indexEditingTodo}});
-                this.dispatch({action: "TOGGLE_EDIT", payload: {index: index}});
+                editingTodo && this.dispatch({action: "TOGGLE_EDIT_STATUS_TODO", payload: {id: editingTodo._id}});
+                this.dispatch({action: "TOGGLE_EDIT_STATUS_TODO", payload: {id: todo._id}});
             });
 
             buttonsDelete[index].addEventListener("click", async () => {
                 await this.removeTodo(todo._id);
-                this.dispatch({action: "RELOAD_VIEW_TODOS"});
             });
 
             checkboxesStatus[index].addEventListener("change", async () => {
                 await this.toggleTodo(todo._id, !todo.isCompleted);
-                this.dispatch({action: "RELOAD_VIEW_TODOS"});
             });
         });
     }
@@ -295,9 +330,20 @@ class Engine {
     render() {
         this.currentUser = this.connector.useSelector(state => state.currentUser);
         this.todos = this.connector.useSelector(state => state.todos);
-        this.viewTodos = this.connector.useSelector(state => state.viewTodos);
+        this.currentTab = this.connector.useSelector(state => state.currentTab[this.currentUser.id]);
+        this.viewTodos = this.connector.useSelector(state => {
+            switch (this.currentTab) {
+                case TABS.All:
+                    return [...state.todos];
+                case TABS.Active:
+                    return state.todos.filter(todo => !todo.isCompleted);
+                case TABS.Completed:
+                    return state.todos.filter(todo => todo.isCompleted);
+            }
+        });
+
         
-        if(this.currentUser.id) {
+        if(this.currentUser.id && this.currentTab) {
             this.renderControlElements();
             this.renderList();
             this.renderCounter();
@@ -314,7 +360,6 @@ class Engine {
         allBtn.forEach(btn => btn.classList.contains("current_btn") && btn.classList.toggle("current_btn"));
         button.classList.toggle("current_btn");
         this.dispatch({action: "SET_TAB", payload: {tab: tab}});
-        this.dispatch({action: "RELOAD_VIEW_TODOS"});
     }
 
     async init() {
@@ -323,7 +368,7 @@ class Engine {
         this.todos = this.connector.useSelector(state => state.todos);
         
         if(!this.currentUser.id) {
-            window.location.href = "../../../client/pages/login";
+            window.location.href = "/client/pages/login/";
         }
 
         await this.getAllTodos(this.currentUser.id);
@@ -334,14 +379,12 @@ class Engine {
 
         this.displayName.appendChild(document.createTextNode(this.currentUser.login || ""));
 
-        this.eventEmmiter.on("toggle-all", () => {
-            this.dispatch({action: "TOGGLE_ALL_STATUS"});
-            this.dispatch({action: "RELOAD_VIEW_TODOS"});
+        this.eventEmmiter.on("toggle-all", async () => {
+            await this.toggleAll();
         });
 
-        this.eventEmmiter.on("clear-completed", () => {
-            this.dispatch({action: "CLEAR_COMPLETED"});
-            this.dispatch({action: "RELOAD_VIEW_TODOS"});
+        this.eventEmmiter.on("clear-completed", async () => {
+            await this.clearCompleted();
         });
 
         this.eventEmmiter.on("toggle-tab", (data) => {
@@ -352,7 +395,6 @@ class Engine {
             if(!input.value.trim()) return;
             if(key === "Enter") {
                 await this.addTodo(this.currentUser.id, input.value.trim())
-                this.dispatch({action: "RELOAD_VIEW_TODOS"});
                 input.value = "";
             }
         });
@@ -366,7 +408,7 @@ class Engine {
 
         this.btnLogOut.addEventListener("click", () => {
             this.dispatch({action: "LOG_OUT"});
-            window.location.href = "../../../pages/login";
+            window.location.href = "/client/pages/login/";
         });
 
         this.btnToggleAll.addEventListener("click", () => this.eventEmmiter.emit("toggle-all"));
@@ -377,8 +419,6 @@ class Engine {
         this.btnCompleted.addEventListener("click", () => this.eventEmmiter.emit("toggle-tab", {button: this.btnCompleted, tab: TABS.Completed}));
 
         this.inputTitle.addEventListener("keypress", (e) => this.eventEmmiter.emit("keypress-input", {input: this.inputTitle, key: e.key}));
-
-        this.store.dispatch("RELOAD_VIEW_TODOS");
     }
 }
 

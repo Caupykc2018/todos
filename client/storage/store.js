@@ -5,7 +5,6 @@ class Store {
         this.store = {
             currentTab: initialState.currentTab || {},
             todos: [],
-            viewTodos: [],
             currentUser: initialState.currentUser || {}
         };
     }
@@ -30,35 +29,30 @@ class Store {
                 return state;
             case "SET_TODOS":
                 payload.todos.forEach(payloadTodo => {
-                    state[state.findIndex(todo => todo._id === payloadTodo._id)] = {
-                        ...payloadTodo, 
+                    const index = state.findIndex(todo => todo._id === payloadTodo._id);
+
+                    state[index] = {
+                        ...state[index], 
                         title: payloadTodo.title, 
                         isCompleted: payloadTodo.isCompleted
                     };
                 });
+                return state;
             case "REMOVE_TODO":
                 return state.filter(todo => todo._id !== payload.todo._id);
+            case "REMOVE_TODOS":
+                let editListTodos = [...state];
+                payload.todos.forEach(todo => {
+                    editListTodos = editListTodos.filter(({_id}) => _id !== todo._id);
+                })
+                return editListTodos;
             case "TOGGLE_EDIT_STATUS_TODO":
-                state.find(todo => todo._id === payload.id) = {
-                    ...payload.todo, 
-                    isEdit: payload.id
+                const index = state.findIndex(todo => todo._id === payload.id);
+                state[index] = {
+                    ...state[index], 
+                    isEdit: !state[index].isEdit
                 }
-            default:
                 return state;
-        }
-    }
-
-    reducerViewTodos(state, action, payload) {
-        switch (action) {
-            case "RELOAD_VIEW_TODOS":
-                switch (this.store.currentTab[this.store.currentUser.id]) {
-                    case TABS.All:
-                        return [...this.store.todos];
-                    case TABS.Active:
-                        return this.store.todos.filter(todo => !todo.isCompleted);
-                    case TABS.Completed:
-                        return this.store.todos.filter(todo => todo.isCompleted);
-                }
             default:
                 return state;
         }
@@ -96,7 +90,6 @@ class Store {
             ...state,
             currentTab: this.reducerCurrentTab(state.currentTab, action, payload),
             todos: this.reducerTodos(state.todos, action, payload),
-            viewTodos: this.reducerViewTodos(state.viewTodos, action, payload),
             currentUser: this.reducerCurrentUser(state.currentUser, action, payload)
         }
     }
