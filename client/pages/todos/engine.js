@@ -29,7 +29,7 @@ class Engine {
                 'user-id': userId
             }
         });
-    
+
         const data = await response.json();
         if(response.ok) {
             this.dispatch({action: "INITIAL_TODOS", payload: {todos: data}});
@@ -51,7 +51,7 @@ class Engine {
                 title: title
             })
         });
-    
+
         const data = await response.json();
         if(response.ok) {
             this.dispatch({action: "ADD_TODO", payload: {todo: data}});
@@ -73,7 +73,7 @@ class Engine {
                 title: title
             })
         });
-    
+
         const data = await response.json();
         if(response.ok) {
             this.dispatch({action: "SET_TODO", payload: {todo: data}});
@@ -92,7 +92,7 @@ class Engine {
                 'user-id': this.currentUser.id
             }
         });
-    
+
         const data = await response.json();
         if(response.ok) {
             this.dispatch({action: "REMOVE_TODO", payload: {todo: data}});
@@ -114,7 +114,7 @@ class Engine {
                 isCompleted: isCompleted
             })
         });
-    
+
         const data = await response.json();
         if(response.ok) {
             this.dispatch({action: "SET_TODO", payload: {todo: data}});
@@ -122,7 +122,7 @@ class Engine {
         else {
             alert(data.message);
         }
-    } 
+    }
 
     renderCounter() {
         this.textCount.innerHTML = "";
@@ -296,7 +296,7 @@ class Engine {
         this.currentUser = this.connector.useSelector(state => state.currentUser);
         this.todos = this.connector.useSelector(state => state.todos);
         this.viewTodos = this.connector.useSelector(state => state.viewTodos);
-        
+
         if(this.currentUser.id) {
             this.renderControlElements();
             this.renderList();
@@ -321,9 +321,9 @@ class Engine {
         this.currentUser = this.connector.useSelector(state => state.currentUser);
         this.currentTab = this.connector.useSelector(state => state.currentTab[this.currentUser.id]);
         this.todos = this.connector.useSelector(state => state.todos);
-        
+
         if(!this.currentUser.id) {
-            window.location.href = "../../../client/pages/login";
+            window.location.href = "/Todos/client/pages/login";
         }
 
         await this.getAllTodos(this.currentUser.id);
@@ -366,7 +366,7 @@ class Engine {
 
         this.btnLogOut.addEventListener("click", () => {
             this.dispatch({action: "LOG_OUT"});
-            window.location.href = "../../../pages/login";
+            window.location.href = "/Todos/client/pages/login";
         });
 
         this.btnToggleAll.addEventListener("click", () => this.eventEmmiter.emit("toggle-all"));

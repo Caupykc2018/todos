@@ -7,28 +7,29 @@ class Engine {
     this.store = new Store();
     this.connector = new Connector(this.store, this);
 
+    this.api = new API();
+
     this.dispatch = this.connector.useDispatch();
   }
 
   async login(login, password) {
-    const response = await fetch("http://localhost:3001/api/login", {
-      method: "POST",
-      headers: {
+    await this.api.getData(
+      "/api/login",
+      "POST",
+      {
         'Accept': 'application/json',
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({
+      {
         login: login,
         password: password
-      })
-    });
+      });
 
-    const data = await response.json();
-    if(response.ok) {
-      this.dispatch({action: "SET_CURRENT_USER", payload: {user: data}});
+    if(this.api.data) {
+      this.dispatch({action: "SET_CURRENT_USER", payload: {user: this.api.data}});
     }
     else {
-      alert(data.message);
+      alert(this.api.error);
     }
   }
 
@@ -36,7 +37,7 @@ class Engine {
     this.currentUser = this.connector.useSelector(state => state.currentUser);
 
     if(this.currentUser.id) {
-      window.location.href = "../../../../client/pages/todos";
+      window.location.href = "/Todos/client/pages/todos";
     }
   }
 

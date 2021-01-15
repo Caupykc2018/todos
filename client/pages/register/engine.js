@@ -38,7 +38,7 @@ class Engine {
     this.currentUser = this.connector.useSelector(state => state.currentUser);
 
     if(this.currentUser.id) {
-      window.location.href = "../../../../client/pages/todos";
+      window.location.href = "/Todos/client/pages/todos";
     }
   }
 
