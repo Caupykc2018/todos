@@ -15,150 +15,176 @@ class Engine {
         this.store = new Store();
         this.connector = new Connector(this.store, this);
 
+        this.api = new API();
+
         this.dispatch = this.connector.useDispatch();
 
         this.eventEmmiter = new EventEmitter();
     }
 
-    async getAllTodos(userId) {
-        const response = await fetch("http://localhost:3001/api/todos", {
-            method: "GET",
-            headers: {
+    async refreshToken() {
+        await this.api.query(
+            "/api/refresh-token",
+            "POST",
+            {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'user-id': userId
+            },
+            {
+                refreshToken: this.currentUser.refreshToken
             }
-        });
+        );
 
-        const data = await response.json();
-        if(response.ok) {
-            this.dispatch({action: "INITIAL_TODOS", payload: {todos: data}});
+        if(this.api.data !== null) {
+            this.dispatch({action: "SET_TOKENS_USER", payload: {user: this.api.data}});
         }
         else {
-            alert(data.message);
+            this.dispatch({action: "LOG_OUT"});
         }
     }
 
-    async addTodo(userId, title) {
-        const response = await fetch("http://localhost:3001/api/todos", {
-            method: "POST",
-            headers: {
+    async getAllTodos() {
+        await this.api.query(
+            "/api/todos",
+            "GET",
+            {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'user-id': userId
-            },
-            body: JSON.stringify({
-                title: title
-            })
-        });
+                'Authorization': this.currentUser.token
+            }
+        );
 
-        const data = await response.json();
-        if(response.ok) {
-            this.dispatch({action: "ADD_TODO", payload: {todo: data}});
+        if(this.api.data) {
+            this.dispatch({action: "INITIAL_TODOS", payload: {todos: this.api.data}});
         }
         else {
-            alert(data.message);
+            if(this.api.error.status === 401) {
+                
+            }
+            alert(this.api.error.message);
+        }
+    }
+
+    async addTodo(title) {
+        await this.api.query(
+            "/api/todos",
+            "POST",
+            {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Authorization': this.currentUser.token
+            },
+            {
+                title: title
+            }
+        );
+
+        if(this.api.data) {
+            this.dispatch({action: "ADD_TODO", payload: {todo: this.api.data}});
+        }
+        else {
+            alert(this.api.error.message);
         }
     }
 
     async editTodo(todoId, title) {
-        const response = await fetch(`http://localhost:3001/api/todos/${todoId}`, {
-            method: "PUT",
-            headers: {
+        await this.api.query(
+            `/api/todos/${todoId}`,
+            "PUT",
+            {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'user-id': this.currentUser.id
+                'Authorization': this.currentUser.token
             },
-            body: JSON.stringify({
+            {
                 title: title
-            })
-        });
+            }
+        );
 
-        const data = await response.json();
-        if(response.ok) {
-            this.dispatch({action: "SET_TODO", payload: {todo: data}});
+        if(this.api.data) {
+            this.dispatch({action: "SET_TODO", payload: {todo: this.api.data}});
         }
         else {
-            alert(data.message);
+            alert(this.api.error.message);
         }
     }
 
     async removeTodo(todoId) {
-        const response = await fetch(`http://localhost:3001/api/todos/${todoId}`, {
-            method: "DELETE",
-            headers: {
+        await this.api.query(
+            `/api/todos/${todoId}`,
+            "DELETE",
+            {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'user-id': this.currentUser.id
+                'Authorization': this.currentUser.token
             }
-        });
+        );
 
-        const data = await response.json();
-        if(response.ok) {
-            this.dispatch({action: "REMOVE_TODO", payload: {todo: data}});
+        if(this.api.data) {
+            this.dispatch({action: "REMOVE_TODO", payload: {todo: this.api.data}});
         }
         else {
-            alert(data.message);
+            alert(this.api.error.message);
         }
     }
 
     async toggleTodo(todoId, isCompleted) {
-        const response = await fetch(`http://localhost:3001/api/todos/${todoId}`, {
-            method: "PUT",
-            headers: {
+        await this.api.query(
+            `/api/todos/${todoId}`,
+            "PUT",
+            {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'user-id': this.currentUser.id
+                'Authorization': this.currentUser.token
             },
-            body: JSON.stringify({
+            {
                 isCompleted: isCompleted
-            })
-        });
+            }
+        );
 
-        const data = await response.json();
-        if(response.ok) {
-            this.dispatch({action: "SET_TODO", payload: {todo: data}});
+        if(this.api.data) {
+            this.dispatch({action: "SET_TODO", payload: {todo: this.api.data}});
         }
         else {
-            alert(data.message);
+            alert(this.api.error.message);
         }
     }
 
     async toggleAll() {
-        const response = await fetch(`http://localhost:3001/api/todos/toggle-all`, {
-            method: "POST",
-            headers: {
+        await this.api.query(
+            "/api/todos/toggle-all",
+            "POST",
+            {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'user-id': this.currentUser.id
+                'Authorization': this.currentUser.token
             }
-        });
+        );
 
-        const data = await response.json();
-        if(response.ok) {
-            this.dispatch({action: "SET_TODOS", payload: {todos: data}});
+        if(this.api.data) {
+            this.dispatch({action: "SET_TODOS", payload: {todos: this.api.data}});
         }
         else {
-            alert(data.message);
+            alert(this.api.error.message);
         }
     }
 
     async clearCompleted() {
-        const response = await fetch(`http://localhost:3001/api/todos/clear-completed`, {
-            method: "POST",
-            headers: {
+        await this.api.query(
+            "/api/todos/clear-completed",
+            "POST",
+            {
                 'Accept': 'application/json',
                 'Content-Type': 'application/json',
-                'user-id': this.currentUser.id
+                'Authorization': this.currentUser.token
             }
-        });
+        );
 
-        const data = await response.json();
-        if(response.ok) {
-            this.dispatch({action: "REMOVE_TODOS", payload: {todos: data}});
+        if(this.api.data) {
+            this.dispatch({action: "REMOVE_TODOS", payload: {todos: this.api.data}});
         }
         else {
-            alert(data.message);
+            alert(this.api.error.message);
         }
     }
 
@@ -330,7 +356,7 @@ class Engine {
     render() {
         this.currentUser = this.connector.useSelector(state => state.currentUser);
         this.todos = this.connector.useSelector(state => state.todos);
-        this.currentTab = this.connector.useSelector(state => state.currentTab[this.currentUser.id]);
+        this.currentTab = this.connector.useSelector(state => state.currentTab[this.currentUser.login]);
         this.viewTodos = this.connector.useSelector(state => {
             switch (this.currentTab) {
                 case TABS.All:
@@ -339,21 +365,23 @@ class Engine {
                     return state.todos.filter(todo => !todo.isCompleted);
                 case TABS.Completed:
                     return state.todos.filter(todo => todo.isCompleted);
+                default:
+                    return state.todos
             }
         });
 
+        if(!this.currentUser.login) {
+            window.location.href = "/client/pages/login/";
+        }
 
-        if (this.currentUser.id && this.currentTab) {
-
-            if (this.currentUser.id) {
-                this.renderControlElements();
-                this.renderList();
-                this.renderCounter();
-            }
+        if (this.currentUser.login && this.currentTab) {
+            this.renderControlElements();
+            this.renderList();
+            this.renderCounter();
         }
     }
 
-        toggleTab({button, tab}) {
+    toggleTab({button, tab}) {
         const allBtn = [
             this.btnAll,
             this.btnActive,
@@ -370,12 +398,10 @@ class Engine {
         this.currentTab = this.connector.useSelector(state => state.currentTab[this.currentUser.id]);
         this.todos = this.connector.useSelector(state => state.todos);
 
-        if(!this.currentUser.id) {
-            window.location.href = "/Todos/client/pages/login";
+        if(!this.currentUser.login) {
             window.location.href = "/client/pages/login/";
         }
 
-        await this.getAllTodos(this.currentUser.id);
 
         if(!this.currentTab) {
             this.dispatch({action: "SET_TAB", payload: {tab: TABS.All}})
@@ -398,7 +424,7 @@ class Engine {
         this.eventEmmiter.on("keypress-input", async ({input, key}) => {
             if(!input.value.trim()) return;
             if(key === "Enter") {
-                await this.addTodo(this.currentUser.id, input.value.trim())
+                await this.addTodo(input.value.trim())
                 input.value = "";
             }
         });
@@ -412,7 +438,6 @@ class Engine {
 
         this.btnLogOut.addEventListener("click", () => {
             this.dispatch({action: "LOG_OUT"});
-            window.location.href = "/client/pages/login/";
         });
 
         this.btnToggleAll.addEventListener("click", () => this.eventEmmiter.emit("toggle-all"));
@@ -423,6 +448,15 @@ class Engine {
         this.btnCompleted.addEventListener("click", () => this.eventEmmiter.emit("toggle-tab", {button: this.btnCompleted, tab: TABS.Completed}));
 
         this.inputTitle.addEventListener("keypress", (e) => this.eventEmmiter.emit("keypress-input", {input: this.inputTitle, key: e.key}));
+
+        await this.refreshToken();
+
+        setInterval(async () => {
+            console.log("refresh"); 
+            await this.refreshToken();
+        }, 60000);
+
+        await this.getAllTodos();
     }
 }
 

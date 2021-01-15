@@ -9,13 +9,14 @@ class API {
     this.data = null;
   }
 
-  async getData(url, method, headers, body) {
+  async query(url = "/", method = "GET", headers = {}, body = null) {
     this.clearData();
 
     const response = await fetch(`http://localhost:3001${url}`, {
       method: method,
       headers: headers,
-      body: JSON.stringify(body)
+      credentials: 'include',
+      body: body && JSON.stringify(body)
     });
 
     const data = await response.json();
@@ -24,7 +25,9 @@ class API {
       this.data = data;
     }
     else {
-      this.error = data.message;
+      this.error = {message: data.message, status: response.status};
     }
   }
+
+  
 }
