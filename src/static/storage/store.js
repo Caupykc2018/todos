@@ -61,7 +61,6 @@ class Store {
     reducerUsers(state, action, payload) {
         switch (action) {
             case "INITIAL_USERS":
-                console.log(payload.users);
                 return payload.users;
             case "ADD_USER":
                 return [...state, payload.user];

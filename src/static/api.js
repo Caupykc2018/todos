@@ -28,6 +28,4 @@ class API {
       this.error = {message: data.message, status: response.status};
     }
   }
-
-
 }

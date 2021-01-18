@@ -35,7 +35,7 @@ class Engine {
             }
         );
 
-        if(this.api.data !== null) {
+        if(this.api.data) {
             this.dispatch({action: "SET_TOKENS_USER", payload: {user: this.api.data}});
         }
         else {

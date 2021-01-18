@@ -1,6 +1,8 @@
 class Engine {
   constructor() {
     this.usersContainer = document.getElementsByClassName("users")[0];
+    this.login = document.getElementById("display_name");
+    this.btnLogOut = document.getElementById("log_out");
 
     this.store = new Store();
     this.connector = new Connector(this.store, this);
@@ -23,11 +25,16 @@ class Engine {
       }
     );
 
-    if(this.api.data !== null) {
+    if(this.api.data) {
       this.dispatch({action: "SET_TOKENS_USER", payload: {user: this.api.data}});
     }
     else {
-      this.dispatch({action: "LOG_OUT"});
+      if(this.api.error.status === 403) {
+        window.location.href = "/todos";
+      }
+      else if(this.api.error.status === 401) {
+        this.dispatch({action: "LOG_OUT"});
+      }
     }
   }
 
@@ -46,6 +53,9 @@ class Engine {
       this.dispatch({action: "INITIAL_USERS", payload: {users: this.api.data}});
     }
     else {
+      if(this.api.error.status === 403) {
+        window.location.href = "/todos";
+      }
       alert(this.api.error.message);
     }
   }
@@ -143,7 +153,6 @@ class Engine {
     }
     else {
       status.addEventListener("change", async () => {
-        console.log(user);
         await this.editActiveUser(user._id, !user.isActive);
       })
     }
@@ -217,16 +226,31 @@ class Engine {
   async init() {
     this.currentUser = this.connector.useSelector(state => state.currentUser);
 
+    this.login.appendChild(document.createTextNode(this.currentUser.login));
+
+    this.btnLogOut.addEventListener("click", () => {
+      this.dispatch({action: "LOG_OUT"});
+    })
+
     await this.refreshToken();
 
-    setInterval(async () => await this.refreshToken(), 60000);
-
     await this.getAllUsers();
+
+
+    setInterval(async () => {
+      await this.refreshToken(); 
+      await this.getAllUsers()
+    }, 60000);
+
   }
 
   render() {
     this.currentUser = this.connector.useSelector(state => state.currentUser);
     this.users = this.connector.useSelector(state => state.users);
+
+    if(!this.currentUser.login) {
+      window.location.href = "/login";
+    }
 
     this.usersContainer.innerHTML = "";
 

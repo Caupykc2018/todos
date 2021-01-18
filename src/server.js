@@ -14,7 +14,7 @@ function bootstrap() {
 export async function startup() {
   const app = bootstrap();
 
-  await app.listen(3000);
+  await app.listen(3002);
 
-  console.log("Listen server on 3000");
+  console.log("Listen server on 3002");
 }
