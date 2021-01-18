@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/admin/style.css">
+    <script src='https://kit.fontawesome.com/a076d05399.js'></script>
+    <script src="/static/const.js"></script>
+    <script src="/static/storage/connector.js"></script>
+    <script src="/static/storage/store.js"></script>
+    <script src="/static/api.js"></script>
+    <script src="/admin/engine.js"></script>
+    <title>Admin</title>
+</head>
+<body>
+    <div class="root">
+        <div class="menu">
+            <div class="menu_left">
+                <div class="logo">
+                    <img class="logo_img" src="https://upload.wikimedia.org/wikipedia/commons/c/c4/Frente_de_Todos_logo.svg" alt="logo"/>
+                </div>
+                <div class="navigation">
+                    <a href="/todos">Todos</a>
+                    <a href="/admin">Admin</a>
+                </div>
+            </div>
+            <div class="account">
+                <div>Hi, </div>
+                <div class="login" id="display_name"></div>
+                <button id="log_out" class="log_out">Log Out</button>
+            </div>
+        </div>
+        <h1 class="title">admin</h1>
+        <div class="app">
+            <div class="column_title">
+                <div class="column_title_login">
+                    <p>Login</p>
+                </div>
+                <div class="column_title_status">
+                    <p>Status</p>
+                </div>
+                <div class="column_title_role">
+                    <p>Role</p>
+                </div>
+                <div class="column_title_none"></div>
+            </div>
+            <div class="users"></div>
+        </div>
+    </div>
+</body>
+</html>

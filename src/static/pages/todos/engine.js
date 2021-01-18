@@ -58,9 +58,6 @@ class Engine {
             this.dispatch({action: "INITIAL_TODOS", payload: {todos: this.api.data}});
         }
         else {
-            if(this.api.error.status === 401) {
-                
-            }
             alert(this.api.error.message);
         }
     }
@@ -371,7 +368,7 @@ class Engine {
         });
 
         if(!this.currentUser.login) {
-            window.location.href = "/client/pages/login/";
+            window.location.href = "../login/";
         }
 
         if (this.currentUser.login && this.currentTab) {
@@ -399,7 +396,7 @@ class Engine {
         this.todos = this.connector.useSelector(state => state.todos);
 
         if(!this.currentUser.login) {
-            window.location.href = "/client/pages/login/";
+            window.location.href = "../login/";
         }
 
 
@@ -451,10 +448,7 @@ class Engine {
 
         await this.refreshToken();
 
-        setInterval(async () => {
-            console.log("refresh"); 
-            await this.refreshToken();
-        }, 60000);
+        setInterval(async () => await this.refreshToken(), 60000);
 
         await this.getAllTodos();
     }

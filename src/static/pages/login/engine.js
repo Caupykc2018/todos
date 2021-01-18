@@ -30,7 +30,7 @@ class Engine {
       this.dispatch({action: "SET_CURRENT_USER", payload: {user: this.api.data}});
     }
     else {
-      alert(this.api.error);
+      alert(this.api.error.message);
     }
   }
 
@@ -38,7 +38,7 @@ class Engine {
     this.currentUser = this.connector.useSelector(state => state.currentUser);
 
     if(this.currentUser.login) {
-      window.location.href = "/client/pages/todos";
+      window.location.href = "../todos";
     }
   }
 

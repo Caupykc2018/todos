@@ -5,6 +5,7 @@ class Store {
         this.store = {
             currentTab: initialState.currentTab || {},
             todos: [],
+            users: [],
             currentUser: initialState.currentUser || {}
         };
     }
@@ -15,9 +16,8 @@ class Store {
 
     reducerTodos(state, action, payload) {
         switch (action) {
-            case "INITIAL_TODOS": {
+            case "INITIAL_TODOS":
                 return payload.todos.map(todo => ({...todo, isEdit: false}))
-            }
             case "ADD_TODO":
                 return [...state, {...payload.todo, isEdit: false}];
             case "SET_TODO":
@@ -58,6 +58,27 @@ class Store {
         }
     }
 
+    reducerUsers(state, action, payload) {
+        switch (action) {
+            case "INITIAL_USERS":
+                console.log(payload.users);
+                return payload.users;
+            case "ADD_USER":
+                return [...state, payload.user];
+            case "SET_USER":
+                state[state.findIndex(user => user._id === payload.user._id)] = {
+                    ...payload.user,
+                    isActive: payload.user.isActive,
+                    role: payload.user.role
+                };
+                return state;
+            case "REMOVE_USER":
+                return state.filter(user => user._id !== payload.user._id);
+            default:
+                return state;
+        }
+    }
+
     reducerCurrentTab(state, action, payload) {
         switch (action) {
             case "SET_TAB":
@@ -76,7 +97,8 @@ class Store {
                 return {
                     token: payload.user.token,
                     refreshToken: payload.user.refreshToken,
-                    login: payload.user.login
+                    login: payload.user.login,
+                    role: payload.user.role
                 };
             case "SET_TOKENS_USER":
                 return {
@@ -96,6 +118,7 @@ class Store {
             ...state,
             currentTab: this.reducerCurrentTab(state.currentTab, action, payload),
             todos: this.reducerTodos(state.todos, action, payload),
+            users: this.reducerUsers(state.users, action, payload),
             currentUser: this.reducerCurrentUser(state.currentUser, action, payload)
         }
     }

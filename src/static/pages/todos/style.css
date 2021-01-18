@@ -237,3 +237,20 @@ body {
     padding: 0 5px 0 2px;
     font-weight: bold;
 }
+
+.menu_left {
+    display: flex;
+    flex-direction: row;
+
+}
+
+.navigation {
+    display: flex;
+    align-items: center;
+}
+
+.navigation a {
+    padding: 10px;
+    text-decoration: none;
+    font-size: 20px;
+}

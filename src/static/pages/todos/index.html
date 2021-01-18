@@ -2,22 +2,27 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="/todos/style.css">
     <script src='https://kit.fontawesome.com/a076d05399.js'></script>
-    <script src="../../const.js"></script>
-    <script src="../../eventEmitter.js"></script>
-    <script src="../../storage/connector.js"></script>
-    <script src="../../storage/store.js"></script>
-    <script src="../../api.js"></script>
-    <script src="engine.js"></script>
+    <script src="/static/const.js"></script>
+    <script src="/static/eventEmitter.js"></script>
+    <script src="/static/storage/connector.js"></script>
+    <script src="/static/storage/store.js"></script>
+    <script src="/static/api.js"></script>
+    <script src="/todos/engine.js"></script>
     <title>Todos</title>
 </head>
 <body>
     <div class="root">
         <div class="menu">
-            <div class="logo">
-                <img class="logo_img" src="https://upload.wikimedia.org/wikipedia/commons/c/c4/Frente_de_Todos_logo.svg" alt="logo"/>
+            <div class="menu_left">
+                <div class="logo">
+                    <img class="logo_img" src="https://upload.wikimedia.org/wikipedia/commons/c/c4/Frente_de_Todos_logo.svg" alt="logo"/>
+                </div>
+                <div class="navigation">
+                    <a href="/todos">Todos</a>
+                    <a href="/admin">Admin</a>
+                </div>
             </div>
             <div class="account">
                 <div>Hi, </div>

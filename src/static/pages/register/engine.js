@@ -7,7 +7,7 @@ class Engine {
 
     this.store = new Store();
     this.connector = new Connector(this.store, this);
-    
+
     this.api = new API();
 
     this.dispatch = this.connector.useDispatch();
@@ -39,7 +39,7 @@ class Engine {
     this.currentUser = this.connector.useSelector(state => state.currentUser);
 
     if(this.currentUser.login) {
-      window.location.href = "/client/pages/todos";
+      window.location.href = "../todos";
     }
   }
 
@@ -47,7 +47,7 @@ class Engine {
     this.currentUser = this.connector.useSelector(state => state.currentUser);
 
     if(this.currentUser.login) {
-      window.location.href = "/client/pages/todos";
+      window.location.href = "../todos";
     }
 
     this.submitButton.addEventListener("click", async () => {

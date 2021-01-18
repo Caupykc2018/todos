@@ -1,0 +1,33 @@
+{
+  "name": "todos",
+  "version": "1.0.0",
+  "description": "http://todomvc.com/examples/backbone/#/",
+  "main": "src/static/api.js",
+  "dependencies": {
+    "koa": "^2.13.1",
+    "koa-mount": "^4.0.0",
+    "koa-router": "^10.0.0",
+    "koa-static": "^5.0.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.10",
+    "@babel/plugin-transform-runtime": "^7.12.10",
+    "@babel/preset-env": "^7.12.11",
+    "@babel/register": "^7.12.10"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon src/index"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Caupykc2018/todos.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Caupykc2018/todos/issues"
+  },
+  "homepage": "https://github.com/Caupykc2018/todos#readme"
+}
